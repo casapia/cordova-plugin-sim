@@ -1,9 +1,23 @@
-# cordova-plugin-sim
+#### This is a fork of the original plugin community-cordova-plugin-sim
 
-[![npm](https://img.shields.io/npm/v/cordova-plugin-sim.svg)](https://www.npmjs.com/package/cordova-plugin-sim)
-[![Code Climate](https://codeclimate.com/github/pbakondy/cordova-plugin-sim/badges/gpa.svg)](https://codeclimate.com/github/pbakondy/cordova-plugin-sim)
-![Platform](https://img.shields.io/badge/platform-android%20%7C%20ios%20%7C%20windows-lightgrey.svg)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=R7STJ6V2PNEMA)
+I dedicate a considerable amount of my free time to developing and maintaining many cordova plugins for the community ([See the list with all my maintained plugins][community_plugins]).
+To help ensure this plugin is kept updated,
+new features are added and bugfixes are implemented quickly,
+please donate a couple of dollars (or a little more if you can stretch) as this will help me to afford to dedicate time to its maintenance.
+Please consider donating if you're using this plugin in an app that makes you money,
+or if you're asking for new features or priority bug fixes. Thank you!
+
+[![](https://img.shields.io/static/v1?label=Sponsor%20Me&style=for-the-badge&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/eyalin)
+
+
+
+Android:
+all functions that need PHONE_STATE permission have been removed, the rest are supported.
+
+# community-cordova-plugin-sim
+
+[![NPM version](https://img.shields.io/npm/v/community-cordova-plugin-sim)](https://www.npmjs.com/package/community-cordova-plugin-sim)
+[![Downloads](https://img.shields.io/npm/dm/community-cordova-plugin-sim)](https://www.npmjs.com/package/community-cordova-plugin-sim)
 
 This is a cordova plugin to get data from the SIM card like the carrier name, mcc, mnc and country code and other system dependent additional info.
 
@@ -11,7 +25,7 @@ This is a cordova plugin to get data from the SIM card like the carrier name, mc
 ## Installation
 
 ```
-cordova plugin add cordova-plugin-sim
+cordova plugin add community-cordova-plugin-sim
 ```
 
 ## Supported Platforms
@@ -37,6 +51,16 @@ function successCallback(result) {
 function errorCallback(error) {
   console.log(error);
 }
+
+// Android only: check permission
+function hasReadPermission() {
+  window.plugins.sim.hasReadPermission(successCallback, errorCallback);
+}
+
+// Android only: request permission
+function requestReadPermission() {
+  window.plugins.sim.requestReadPermission(successCallback, errorCallback);
+}
 ```
 
 The plugin returns a JSON object. Return values:
@@ -54,11 +78,31 @@ You can extract country and carrier data from MCC and MNC codes, read further on
 
 You can find the name of mobile provider using [mcc-mnc-list](https://www.npmjs.com/package/mcc-mnc-list) npm package.
 
+### Ionic 2 Usage
+
+```typescript
+import { Sim } from 'ionic-native';
+
+Sim.getSimInfo().then(
+  (info) => console.log('Sim info: ', info),
+  (err) => console.log('Unable to get sim info: ', err)
+);
+
+Sim.hasReadPermission().then(
+  (info) => console.log('Has permission:', info)
+);
+
+Sim.requestReadPermission().then(
+  () => console.log('Permission granted'),
+  () => console.log('Permission denied')
+);
+```
+
+Required: [ionic-native](https://www.npmjs.com/package/ionic-native) v2.2.13
+
+See [Ionic Native documentation](https://ionicframework.com/docs/v2/native/sim/).
+
 ## Android Quirks
-
-### Requirements
-
-Install `Extras` / `Android Support Library` from Android SDK.
 
 ### Under the hood
 
@@ -108,7 +152,7 @@ All methods of `SubscriptionManager` require permission `READ_PHONE_STATE`.
   - `subscriptionId`: {String} Subscription Identifier, this is a device unique number
 
 
-<sup>1)</sup> Notice: the content of phoneNumber is unreliable (see [this](http://stackoverflow.com/questions/7922734/getting-reliable-msisdn-from-android-phone-voicemailnumber-line1number) and [this](http://stackoverflow.com/questions/25861064/retrieving-line1-number-from-telephonymanager-in-android) article).
+<sup>1)</sup> Notice: the content of phoneNumber is unreliable (see [this](http://stackoverflow.com/a/6797278), [this](http://stackoverflow.com/questions/7922734/getting-reliable-msisdn-from-android-phone-voicemailnumber-line1number), and [this](http://stackoverflow.com/questions/25861064/retrieving-line1-number-from-telephonymanager-in-android) article).
 Sometimes phoneNumber is only an empty string.
 
 ### Android Emulator results
@@ -172,6 +216,9 @@ Sometimes phoneNumber is only an empty string.
 |   13 | `NETWORK_TYPE_LTE`            | LTE
 |   14 | `NETWORK_TYPE_EHRPD`          | eHRPD
 |   15 | `NETWORK_TYPE_HSPAP`          | HSPA+
+|   16 | `NETWORK_TYPE_GSM`            | GSM
+|   17 | `NETWORK_TYPE_TD_SCDMA`       | TD-SCDMA
+|   18 | `NETWORK_TYPE_IWLAN`          | IWLAN
 
 
 ### List of Phone Type Codes and Meanings
@@ -275,4 +322,6 @@ Additional return values:
 
 ## LICENSE
 
-cordova-plugin-sim is licensed under the MIT Open Source license. For more information, see the LICENSE file in this repository.
+**cordova-plugin-sim** is licensed under the MIT Open Source license. For more information, see the LICENSE file in this repository.
+
+[community_plugins]: https://github.com/EYALIN?tab=repositories&q=community&type=&language=&sort=

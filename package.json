@@ -1,9 +1,9 @@
 {
-  "name": "cordova-plugin-sim",
-  "version": "1.3.1",
+  "name": "community-cordova-plugin-sim",
+  "version": "1.4.2",
   "description": "A plugin to get the device's SIM data (carrier name, mcc mnc, country code, telephonenumber, imei, etc)",
   "cordova": {
-    "id": "cordova-plugin-sim",
+    "id": "community-cordova-plugin-sim",
     "platforms": [
       "android",
       "ios",
@@ -12,10 +12,9 @@
       "windows"
     ]
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/pbakondy/cordova-plugin-sim.git"
-  },
+  "repository": "EYALIN/community-cordova-plugin-sim/tree/master",
+  "homepage": "https://github.com/EYALIN/community-cordova-plugin-sim/tree/master",
+  "funding": "https://github.com/sponsors/EYALIN",
   "keywords": [
     "cordova",
     "sim",
@@ -36,10 +35,9 @@
       "version": ">=3.0.0"
     }
   ],
-  "author": "Peter Bakondy",
+  "author": "EYALIN",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/pbakondy/cordova-plugin-sim/issues"
-  },
-  "homepage": "https://github.com/pbakondy/cordova-plugin-sim#readme"
+  }
 }

@@ -22,6 +22,8 @@
 // https://developer.android.com/reference/android/telephony/SubscriptionInfo.html
 // https://github.com/android/platform_frameworks_base/blob/master/telephony/java/android/telephony/SubscriptionInfo.java
 
+// Cordova Permissions API
+// https://cordova.apache.org/docs/en/latest/guide/platforms/android/plugin.html#android-permissions
 
 package com.pbakondy;
 
@@ -39,12 +41,14 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.Manifest;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
+import android.util.Log;
+
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class Sim extends CordovaPlugin {
@@ -76,9 +80,12 @@ public class Sim extends CordovaPlugin {
       Integer activeSubscriptionInfoCountMax = null;
 
       try {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+        // TelephonyManager.getPhoneCount() requires API 23
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+          phoneCount = manager.getActiveModemCount();
+        }
 
-          phoneCount = manager.getPhoneCount();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
 
           if (simPermissionGranted(Manifest.permission.READ_PHONE_STATE)) {
 
@@ -103,7 +110,12 @@ public class Sim extends CordovaPlugin {
               int subscriptionId = subscriptionInfo.getSubscriptionId();
 
               boolean networkRoaming = subscriptionManager.isNetworkRoaming(simSlotIndex);
-              String deviceId = manager.getDeviceId(simSlotIndex);
+
+              String deviceId = null;
+              // TelephonyManager.getDeviceId(slotId) requires API 23
+              if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                deviceId = manager.getDeviceId(simSlotIndex);
+              }
 
               JSONObject simData = new JSONObject();
 
@@ -116,7 +128,9 @@ public class Sim extends CordovaPlugin {
               simData.put("isDataRoaming", (dataRoaming == 1));
               simData.put("simSlotIndex", simSlotIndex);
               simData.put("phoneNumber", number);
-              simData.put("deviceId", deviceId);
+              if (deviceId != null) {
+                simData.put("deviceId", deviceId);
+              }
               simData.put("simSerialNumber", iccId);
               simData.put("subscriptionId", subscriptionId);
 
@@ -130,6 +144,7 @@ public class Sim extends CordovaPlugin {
       } catch (Exception e) {
         e.printStackTrace();
       }
+          Log.w("manager result ", manager.toString());
 
       String phoneNumber = null;
       String countryCode = manager.getSimCountryIso();
@@ -141,21 +156,19 @@ public class Sim extends CordovaPlugin {
       String simSerialNumber = null;
       String subscriberId = null;
 
-      int callState = manager.getCallState();
       int dataActivity = manager.getDataActivity();
-      int networkType = 0;
       int phoneType = manager.getPhoneType();
       int simState = manager.getSimState();
 
       boolean isNetworkRoaming = manager.isNetworkRoaming();
 
-      if (simPermissionGranted(Manifest.permission.READ_PHONE_STATE)) {
-        phoneNumber = manager.getLine1Number();
-        deviceId = manager.getDeviceId();
-        deviceSoftwareVersion = manager.getDeviceSoftwareVersion();
-        simSerialNumber = manager.getSimSerialNumber();
-        subscriberId = manager.getSubscriberId();
-      }
+//       if (simPermissionGranted(Manifest.permission.READ_PHONE_STATE)) {
+//         phoneNumber = manager.getLine1Number();
+//         deviceId = manager.getDeviceId();
+//         deviceSoftwareVersion = manager.getDeviceSoftwareVersion();
+//         simSerialNumber = manager.getSimSerialNumber();
+//         subscriberId = manager.getSubscriberId();
+//       }
 
       String mcc = "";
       String mnc = "";
@@ -166,15 +179,14 @@ public class Sim extends CordovaPlugin {
       }
 
       JSONObject result = new JSONObject();
+          Log.w("sim result ", result.toString());
 
       result.put("carrierName", carrierName);
       result.put("countryCode", countryCode);
       result.put("mcc", mcc);
       result.put("mnc", mnc);
 
-      result.put("callState", callState);
       result.put("dataActivity", dataActivity);
-      result.put("networkType", networkType);
       result.put("phoneType", phoneType);
       result.put("simState", simState);
 
@@ -190,17 +202,32 @@ public class Sim extends CordovaPlugin {
         result.put("activeSubscriptionInfoCountMax", (int)activeSubscriptionInfoCountMax);
       }
 
-      if (simPermissionGranted(Manifest.permission.READ_PHONE_STATE)) {
-        result.put("phoneNumber", phoneNumber);
-        result.put("deviceId", deviceId);
-        result.put("deviceSoftwareVersion", deviceSoftwareVersion);
-        result.put("simSerialNumber", simSerialNumber);
-        result.put("subscriberId", subscriberId);
+//       if (simPermissionGranted(Manifest.permission.READ_PHONE_STATE)) {
+//         result.put("phoneNumber", phoneNumber);
+//         result.put("deviceId", deviceId);
+//         result.put("deviceSoftwareVersion", deviceSoftwareVersion);
+//         result.put("simSerialNumber", simSerialNumber);
+//         result.put("subscriberId", subscriberId);
+//       }
+
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        // android.telephony.SubscriptionManager#getDefaultDataSubscriptionId requires API 24
+        result.put("defaultDataSubscriptionId", SubscriptionManager.getDefaultDataSubscriptionId());
+      } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
+        // android.telephony.SubscriptionManager#getDefaultDataSubId requires API 22, must be accessed through reflection
+        try {
+          Method getDefaultDataSubId = SubscriptionManager.class.getDeclaredMethod("getDefaultDataSubId");
+          getDefaultDataSubId.setAccessible(true);
+          result.put("defaultDataSubscriptionId", getDefaultDataSubId.invoke(null));
+        } catch (Exception e) {
+          Log.w("Sim", e);
+        }
       }
 
       if (sims != null && sims.length() != 0) {
         result.put("cards", sims);
       }
+
 
       callbackContext.success(result);
 
@@ -229,26 +256,17 @@ public class Sim extends CordovaPlugin {
     if (Build.VERSION.SDK_INT < 23) {
       return true;
     }
-    return (PackageManager.PERMISSION_GRANTED ==
-      ContextCompat.checkSelfPermission(this.cordova.getActivity(), type));
+     return true;
   }
 
   private void requestPermission(String type) {
     LOG.i(LOG_TAG, "requestPermission");
-    if (!simPermissionGranted(type)) {
-      cordova.requestPermission(this, 12345, type);
-    } else {
-      this.callback.success();
-    }
+   this.callback.success();
   }
 
   @Override
   public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException
   {
-    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-      this.callback.success();
-    } else {
-      this.callback.error("Permission Denied.");
-    }
+   this.callback.success();
   }
 }
