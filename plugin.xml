@@ -4,33 +4,41 @@
   id="community-cordova-plugin-sim"
   version="1.4.2">
   <name>SIM</name>
-  <description>A plugin to get the device's SIM data (carrier name, mcc mnc, country code, telephonenumber, imei, etc)</description>
+  <description>A plugin to get the device's SIM data (carrier name, mcc mnc, country code,
+    telephonenumber, imei, etc)</description>
   <license>MIT</license>
   <keywords>cordova,sim,carrier,mcc,mnc,telephonenumber</keywords>
   <repo>https://github.com/EYALIN/community-cordova-plugin-sim/issues</repo>
   <issue>https://github.com/pbakondy/cordova-plugin-sim/issues</issue>
 
   <engines>
-    <engine name="cordova" version=">=3.0.0"/>
-    <engine name="cordova-android" version=">=5.0.0"/>
-  </engines>
+    <engine name="cordova" version=">=11.0.0" />
+    <engine name="cordova-android" version=">=11.0.0" />
+    <engine name="cordova-ios" version=">=6.2.0" />
+</engines>
 
   <js-module src="www/sim.js" name="Sim">
-    <merges target="window.plugins.sim" />
+    <merges target="cordova.plugins.sim" />
   </js-module>
 
   <!-- android -->
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="Sim">
-        <param name="android-package" value="com.pbakondy.Sim"/>
+        <param name="android-package" value="com.pbakondy.Sim" />
       </feature>
     </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/manifest">
+      <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    </config-file>
+
+    <dependency id="cordova-support-android-plugin" version="~2.0.4" />
 
     <source-file src="src/android/com/pbakondy/Sim.java" target-dir="src/com/pbakondy" />
 
     <js-module src="www/android/sim.js" name="SimAndroid">
-      <merges target="window.plugins.sim" />
+      <merges target="cordova.plugins.sim" />
     </js-module>
   </platform>
 
@@ -42,40 +50,9 @@
       </feature>
     </config-file>
 
-    <header-file src="src/ios/Sim.h"/>
-    <source-file src="src/ios/Sim.m"/>
+    <header-file src="src/ios/Sim.h" />
+    <source-file src="src/ios/Sim.m" />
 
-    <framework src="CoreTelephony.framework"/>
+    <framework src="CoreTelephony.framework" />
   </platform>
-
-  <!-- wp7 -->
-  <platform name="wp7">
-    <config-file target="config.xml" parent="/*">
-      <feature name="Sim">
-        <param name="wp-package" value="Sim"/>
-      </feature>
-    </config-file>
-
-    <config-file target="Properties/WMAppManifest.xml" parent="/Deployment/App/Capabilities">
-        <Capability Name="ID_CAP_NETWORKING" />
-    </config-file>
-
-    <source-file src="src/wp/Sim.cs" />
-  </platform>
-
-  <!-- wp8 -->
-  <platform name="wp8">
-    <config-file target="config.xml" parent="/*">
-      <feature name="Sim">
-        <param name="wp-package" value="Sim"/>
-      </feature>
-    </config-file>
-
-    <config-file target="Properties/WMAppManifest.xml" parent="/Deployment/App/Capabilities">
-        <Capability Name="ID_CAP_NETWORKING" />
-    </config-file>
-
-    <source-file src="src/wp/Sim.cs" />
-  </platform>
-
 </plugin>
