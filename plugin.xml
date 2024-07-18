@@ -15,7 +15,7 @@
     <engine name="cordova" version=">=11.0.0" />
     <engine name="cordova-android" version=">=11.0.0" />
     <engine name="cordova-ios" version=">=6.2.0" />
-</engines>
+  </engines>
 
   <js-module src="www/sim.js" name="Sim">
     <merges target="cordova.plugins.sim" />
@@ -26,6 +26,7 @@
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="Sim">
         <param name="android-package" value="com.pbakondy.Sim" />
+        <param name="onload" value="true" />
       </feature>
     </config-file>
 

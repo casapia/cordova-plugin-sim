@@ -16,7 +16,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,17 +23,27 @@ import org.json.JSONObject;
 import java.util.List;
 
 import by.chemerisuk.cordova.support.CordovaMethod;
+import by.chemerisuk.cordova.support.ReflectiveCordovaPlugin;
 
-public class Sim extends CordovaPlugin {
+public class Sim extends ReflectiveCordovaPlugin {
     private static final String TAG = "CordovaPluginSim";
-    private ActivityResultLauncher<String> requestPermissionLauncher;
     private CallbackContext requestPermissionCallback;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     @Override
     protected void pluginInitialize() {
-        requestPermissionLauncher = cordova.getActivity().registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-            requestPermissionCallback.sendPluginResult(new PluginResult(PluginResult.Status.OK, isGranted));
-        });
+//        requestPermissionLauncher = cordova.getActivity().registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+//            requestPermissionCallback.sendPluginResult(new PluginResult(PluginResult.Status.OK, isGranted));
+//        });
+
+        requestPermissionLauncher = cordova.getActivity().registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (requestPermissionCallback != null) {
+                        requestPermissionCallback.sendPluginResult(new PluginResult(PluginResult.Status.OK, isGranted));
+                        requestPermissionCallback = null;
+                    }
+                });
     }
 
     @CordovaMethod(WORKER)
