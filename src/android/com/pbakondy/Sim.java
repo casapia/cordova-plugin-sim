@@ -71,6 +71,41 @@ public class Sim extends ReflectiveCordovaPlugin {
     }
 
     @CordovaMethod(WORKER)
+    private void getSimInfoLite(CallbackContext callbackContext) {
+        try {
+            Context context = this.cordova.getActivity().getApplicationContext();
+            TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            SubscriptionManager subscriptionManager = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+
+            String mcc = "";
+            String mnc = "";
+            String simOperator = manager.getSimOperator();
+            if (simOperator.length() >= 3) {
+                mcc = simOperator.substring(0, 3);
+                mnc = simOperator.substring(3);
+            }
+            JSONObject result = new JSONObject();
+            result.put("carrierName", manager.getSimOperatorName());
+            result.put("countryCode", manager.getSimCountryIso());
+            result.put("mcc", mcc);
+            result.put("mnc", mnc);
+            result.put("dataActivity", manager.getDataActivity());
+            result.put("phoneType", manager.getPhoneType());
+            result.put("simState", manager.getSimState());
+            result.put("isNetworkRoaming", manager.isNetworkRoaming());
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                result.put("phoneCount", manager.getActiveModemCount());
+            }
+//            result.put("activeSubscriptionInfoCount", subscriptionManager.getActiveSubscriptionInfoCount());
+            result.put("activeSubscriptionInfoCountMax", subscriptionManager.getActiveSubscriptionInfoCountMax());
+            result.put("defaultDataSubscriptionId", SubscriptionManager.getDefaultDataSubscriptionId());
+            callbackContext.success(result);
+        } catch (Exception e) {
+            callbackContext.error(e.getMessage());
+        }
+    }
+
+    @CordovaMethod(WORKER)
     private void getSimInfo(CallbackContext callbackContext) {
         try {
             if (ContextCompat.checkSelfPermission(cordova.getActivity(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
