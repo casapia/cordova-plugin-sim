@@ -18,7 +18,7 @@
   </engines>
 
   <js-module src="www/sim.js" name="Sim">
-    <merges target="cordova.plugins.sim" />
+    <merges target="window.plugins.sim" />
   </js-module>
 
   <!-- android -->
@@ -29,18 +29,8 @@
         <param name="onload" value="true" />
       </feature>
     </config-file>
-
-    <config-file target="AndroidManifest.xml" parent="/manifest">
-      <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    </config-file>
-
     <dependency id="cordova-support-android-plugin" version="~2.0.4" />
-
     <source-file src="src/android/com/pbakondy/Sim.java" target-dir="src/com/pbakondy" />
-
-    <js-module src="www/android/sim.js" name="SimAndroid">
-      <merges target="cordova.plugins.sim" />
-    </js-module>
   </platform>
 
   <!-- ios -->
@@ -50,10 +40,8 @@
         <param name="ios-package" value="Sim" />
       </feature>
     </config-file>
-
     <header-file src="src/ios/Sim.h" />
     <source-file src="src/ios/Sim.m" />
-
     <framework src="CoreTelephony.framework" />
   </platform>
 </plugin>
